@@ -18,11 +18,17 @@ a{color:#2F5D9B}a:hover{color:#1F3F6B}
 </style>
 <style>
 html, body { background: #EEF1EF; color: #1E2421; font-family: 'Noto Sans HK', 'PingFang HK', system-ui, sans-serif; }
+[hidden] { display: none !important; }
 .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 28px; display: flex; flex-direction: column; gap: 14px; }
 .nav { display: flex; gap: 6px; }
 .nav a { font-size: 14px; font-weight: 500; color: #1E2421; text-decoration: none; padding: 8px 14px; border: 1px solid #CDD4D0; border-radius: 999px; background: #FFFFFF; }
 .nav a[aria-current="page"] { background: #2F5D9B; color: #FFFFFF; border-color: #2F5D9B; }
-.sheet { background: #FFFFFF; border: 1px solid #CDD4D0; border-radius: 12px; overflow: hidden; }
+.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.zoom { font: inherit; font-size: 15px; font-weight: 700; min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid #2F5D9B; background: #FFFFFF; color: #2F5D9B; cursor: pointer; }
+.zoom[aria-pressed="true"] { background: #2F5D9B; color: #FFFFFF; }
+.hint { font-size: 13px; color: #55605B; }
+.sheet { background: #FFFFFF; border: 1px solid #CDD4D0; border-radius: 12px; overflow: hidden; -webkit-overflow-scrolling: touch; }
+.sheet.zoomed { overflow: auto; height: 78vh; }
 .fit { width: 1040px; height: 1160px; transform-origin: 0 0; }
 </style>
 </head>
@@ -32,6 +38,10 @@ html, body { background: #EEF1EF; color: #1E2421; font-family: 'Noto Sans HK', '
     <a href="./">3D 模型</a>
     <a href="./plan.html" aria-current="page">平面圖</a>
   </nav>
+  <div class="bar">
+    <button class="zoom" id="zoom" type="button" aria-pressed="false">放大睇尺寸</button>
+    <span class="hint" id="hint" hidden>用手指拖動睇其他位置</span>
+  </div>
   <div class="sheet" id="sheet"><div class="fit" id="fit">
 <div style="width: 1040px; height: 1160px; position: relative; background: #FFFFFF; font-family: 'Noto Sans HK', system-ui, sans-serif; color: #26292E; overflow: hidden">
 
@@ -137,12 +147,17 @@ html, body { background: #EEF1EF; color: #1E2421; font-family: 'Noto Sans HK', '
 <div class="fu" style="left: 625.5px; top: 426px; width: 126px; height: 51.2px; background: rgba(251, 225, 204, 0.9); border-color: #D9752B">鋼琴</div>
 <div class="fu" style="left: 625.5px; top: 477.2px; width: 126px; height: 31.5px; background: rgba(213, 242, 222, 0.9); border-color: #2F9E5B">玄關櫃</div>
 
+<div class="fu" style="left: 233.4px; top: 761.7px; width: 148px; height: 72.5px; background: rgba(42, 157, 143, 0.16); border-color: #2A9D8F; justify-content: flex-start; padding-left: 10px">下層床</div>
+<div class="fu" style="left: 338.1px; top: 834.2px; width: 43.3px; height: 66.9px; background: rgba(42, 157, 143, 0.16); border-color: #2A9D8F">衣櫃</div>
+<div class="fu" style="left: 302.7px; top: 759.4px; width: 78.7px; height: 144.1px; border: 1.5px dashed #2A9D8F; background: transparent; align-items: flex-end; padding-bottom: 4px; font-size: 10px; color: #1F6F66">上層床</div>
+<div style="position: absolute; left: 296.5px; top: 869.6px; width: 6px; height: 28.3px; background: repeating-linear-gradient(to bottom, #6B7078 0 1.5px, transparent 1.5px 5.6px); border-left: 1.5px solid #6B7078; border-right: 1.5px solid #6B7078; box-sizing: border-box"></div>
+
 <!-- 房間名稱 -->
 <div class="lb" style="left: 520px; top: 528px; width: 120px"><div class="nm">客飯廳</div></div>
 <div class="lb" style="left: 340px; top: 354px; width: 90px"><div class="nm" style="font-size: 14px">廚房</div></div>
 <div class="lb" style="left: 188.5px; top: 446px; width: 138.6px"><div class="nm" style="font-size: 14px">樓梯（上）</div></div>
 <div class="lb" style="left: 240px; top: 572px; width: 80px"><div style="font-size: 13px; font-weight: 700">浴室</div></div>
-<div class="lb" style="left: 230px; top: 800px; width: 120px"><div class="nm">睡房 1</div></div>
+<div class="lb" style="left: 200px; top: 706px; width: 96px"><div class="nm">睡房 1</div></div>
 <div class="lb" style="left: 403px; top: 820px; width: 120px"><div class="nm">睡房 2</div></div>
 <div class="lb" style="left: 590px; top: 792px; width: 120px"><div class="nm">睡房 3</div></div>
 <div class="lb" style="left: 770px; top: 440px; width: 96px"><div class="nm" style="font-size: 14px">露台</div></div>
@@ -177,7 +192,7 @@ html, body { background: #EEF1EF; color: #1E2421; font-family: 'Noto Sans HK', '
 <line x1="736.9" y1="667.2" x2="736.9" y2="903.5"></line><line x1="732.9" y1="667.2" x2="740.9" y2="667.2"></line><line x1="732.9" y1="903.5" x2="740.9" y2="903.5"></line>
 <line x1="188.5" y1="890.2" x2="751.5" y2="890.2"></line><line x1="188.5" y1="886.2" x2="188.5" y2="894.2"></line><line x1="381.4" y1="886.2" x2="381.4" y2="894.2"></line><line x1="390.9" y1="886.2" x2="390.9" y2="894.2"></line><line x1="554.3" y1="886.2" x2="554.3" y2="894.2"></line><line x1="563.7" y1="886.2" x2="563.7" y2="894.2"></line><line x1="751.5" y1="886.2" x2="751.5" y2="894.2"></line>
 </g>
-<g fill="#C2410C" stroke="#FFFFFF" stroke-width="3" paint-order="stroke" font-family="'Noto Sans HK', system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="middle">
+<g fill="#C2410C" stroke="#FFFFFF" stroke-width="3" paint-order="stroke" font-family="'Noto Sans HK', system-ui, sans-serif" font-size="13" font-weight="700" text-anchor="middle">
 <text x="619.6" y="281">3350</text>
 <text x="362.1" y="452">650</text>
 <text x="433" y="452">1150</text>
@@ -228,11 +243,27 @@ html, body { background: #EEF1EF; color: #1E2421; font-family: 'Noto Sans HK', '
 <script>
 (function () {
   var sheet = document.getElementById('sheet'), fit = document.getElementById('fit');
+  var btn = document.getElementById('zoom'), hint = document.getElementById('hint');
+  var zoomed = false;
   function size() {
+    if (zoomed) {
+      fit.style.transform = 'none';
+      sheet.style.height = '';
+      return;
+    }
     var s = Math.min(1, sheet.clientWidth / 1040);
     fit.style.transform = 'scale(' + s + ')';
     sheet.style.height = (1160 * s) + 'px';
   }
+  btn.addEventListener('click', function () {
+    zoomed = !zoomed;
+    sheet.classList.toggle('zoomed', zoomed);
+    btn.setAttribute('aria-pressed', zoomed);
+    btn.textContent = zoomed ? '縮細睇全圖' : '放大睇尺寸';
+    hint.hidden = !zoomed;
+    size();
+    if (zoomed) { sheet.scrollLeft = 120; sheet.scrollTop = 200; }
+  });
   window.addEventListener('resize', size);
   size();
 })();
