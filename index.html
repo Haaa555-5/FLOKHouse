@@ -53,6 +53,17 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .legend li{display:flex;align-items:center;gap:6px}
 .sw{width:14px;height:14px;border-radius:3px}
 .note{margin:0;font-size:12px;color:var(--muted);max-width:65ch}
+.info-panel{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:grid;gap:12px}
+.info-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.info-head strong{font-size:15px}.info-head span{font-size:12px;color:var(--muted)}
+.info-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.info-tab{min-height:40px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--fg);font:inherit;cursor:pointer}
+.info-tab[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.info-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:7px}
+.info-item{min-height:38px;padding:6px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--fg);font:inherit;font-size:12px;cursor:pointer;text-align:center}
+.info-item[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+.info-detail{margin:0;padding:10px;border-radius:8px;background:var(--bg);font-size:13px;color:var(--fg)}
+@media(max-width:480px){.info-items{grid-template-columns:repeat(3,minmax(0,1fr))}.stage{height:clamp(380px,64vh,720px)}}
 </style>
 </head>
 <body>
@@ -70,7 +81,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div class="stage" id="stage">
     <canvas id="c" aria-label="單位立體模型，可拖動旋轉"></canvas>
     <div class="labels" id="dims" hidden></div>
-    <div class="labels" id="labels"></div>
+    <div class="labels" id="labels" hidden></div>
     <div class="hint">拖動旋轉 · 兩指縮放</div>
   </div>
   <div class="bar">
@@ -80,9 +91,19 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     </div>
     <button id="tDim" class="tog" type="button" aria-pressed="false">尺寸</button>
     <button id="tLow" class="tog" type="button" aria-pressed="false">矮牆</button>
-    <button id="tLab" class="tog" type="button" aria-pressed="true">名稱</button>
+    <button id="tLab" class="tog" type="button" aria-pressed="false">名稱</button>
     <button id="tTag" class="tog" type="button" aria-pressed="false">標示色</button>
   </div>
+  <section class="info-panel" id="infoPanel" aria-label="模型資料">
+    <div class="info-head"><strong>模型資料</strong><span>選擇類別查看，避免標籤遮住模型</span></div>
+    <div class="info-tabs" role="group" aria-label="資料類別">
+      <button type="button" class="info-tab" data-info="rooms" aria-pressed="true">房間</button>
+      <button type="button" class="info-tab" data-info="furniture" aria-pressed="false">傢俬</button>
+      <button type="button" class="info-tab" data-info="measure" aria-pressed="false">尺寸</button>
+    </div>
+    <div id="infoItems" class="info-items"></div>
+    <p class="info-detail" id="infoDetail">選擇項目查看資料</p>
+  </section>
   <ul class="legend" aria-label="新傢俬標示色">
     <li><span class="sw" style="background:var(--c-tv)"></span>電視櫃</li>
     <li><span class="sw" style="background:var(--c-piano)"></span>鋼琴</li>
@@ -1187,7 +1208,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     }
     return mats[k];
   }
-  var cap = mat(0x2B3036);
+  var cap = mat(0xFFFFFF);
   var glassMat = new THREE.MeshStandardMaterial({color: 0xA9CBE6, transparent: true, opacity: 0.35, roughness: 0.1});
   var lineMat = new THREE.LineBasicMaterial({color: 0x2b3036, transparent: true, opacity: 0.28});
 
@@ -1232,7 +1253,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   }
 
   /* ---------- wall finishes by room (from the site video) ---------- */
-  var FIN = {ext: 0xE7CFC2, liv: 0xF1EDE4, stair: 0xE6E2DA, bath: 0x6E2328, kit: 0xF4F3EF, b1: 0xC3DDD5, b2: 0x55B9CA, b3: 0xF1EDE4};
+  var FIN = {ext: 0xFFFFFF, liv: 0xFFFFFF, stair: 0xFFFFFF, bath: 0xFFFFFF, kit: 0xFFFFFF, b1: 0xFFFFFF, b2: 0xFFFFFF, b3: 0xFFFFFF};
   function roomAt(x, y){
     if (x < 235 || x > 7385 || y < 235 || y > 8299) return 'ext';
     if (x < 1995 && y < 3135) return 'stair';
@@ -1335,9 +1356,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   [[0, 5080], [5436, 8382]].forEach(function(b){
     addBox(st, 7620, 8839, b[0], b[1], -0.12, -0.02, slab, false);
     floor(st, 7620, 8839, b[0], b[1], -0.018, '#EEEDEA', '#D2CFC8', 300);
-    addBox(st, 8739, 8839, b[0], b[1], -0.02, 1.05, para);
-    addBox(st, 7620, 8739, b[0], b[0] + 100, -0.02, 1.05, para);
-    addBox(st, 7620, 8739, b[1] - 100, b[1], -0.02, 1.05, para);
+    // Ground-floor outdoor areas have no balcony parapets.
   });
 
   // grey tile skirting on the outside walls
@@ -1490,8 +1509,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   label('睡房 1', 1200, 7000, 0.1, 'room');
   label('睡房 2', 3600, 7400, 0.1, 'room');
   label('睡房 3', 5900, 6200, 0.1, 'room');
-  label('露台', 8230, 1500, 0.1, 'room');
-  label('露台', 8230, 6900, 0.1, 'room');
+  label('屋外', 8230, 1500, 0.1, 'room');
+  label('屋外', 8230, 6900, 0.1, 'room');
   label('大門', 8000, 3917, 0.3, 'room');
   label('電視櫃 1600×400', 7185, 1035, 1.45, 'furn', 'var(--c-tv)');
   label('鋼琴 1600×650', 6585, 2650, 1.5, 'furn', 'var(--c-piano)');
@@ -1584,6 +1603,54 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   dimLines.renderOrder = 10;
   dimGroup.add(dimLines);
 
+  // Details live below the canvas; show at most one selected label.
+  var infoData = {
+    rooms: [
+      ['客飯廳','客飯廳'],['廚房','廚房'],['浴室','浴室'],['樓梯','樓梯 上'],
+      ['睡房 1','睡房 1'],['睡房 2','睡房 2'],['睡房 3','睡房 3'],
+      ['屋外（前）','屋外'],['屋外（後）','屋外'],['大門','大門']
+    ],
+    furniture: [
+      ['電視櫃','1600 × 400 mm'],['鋼琴','1600 × 650 mm'],
+      ['L型梳化','1900 mm'],['玄關櫃','1600 mm'],
+      ['碌架床','1830 × 1880 mm'],['組合床','950 × 1888 mm'],
+      ['雙人床','1800 × 2000 mm'],['衣櫃','1200 × 600 mm']
+    ],
+    measure: [
+      ['客飯廳','3350 × 3070 mm（主要標示）'],
+      ['廚房','1900 mm（深度標示）'],
+      ['睡房 1','2450 × 3000 mm'],
+      ['睡房 2','2090 × 3000 mm'],
+      ['睡房 3','2370 × 3000 mm'],
+      ['大門','1250 mm'],
+      ['樓底','2500 mm']
+    ]
+  };
+  var infoCategory = 'rooms', selectedInfo = -1;
+  var infoItems = document.getElementById('infoItems'), infoDetail = document.getElementById('infoDetail');
+  function showInfo(category){
+    infoCategory = category; selectedInfo = -1;
+    infoItems.textContent = '';
+    document.querySelectorAll('.info-tab').forEach(function(btn){
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-info') === category);
+    });
+    infoData[category].forEach(function(item, idx){
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'info-item';
+      btn.textContent = item[0]; btn.setAttribute('aria-pressed','false');
+      btn.addEventListener('click',function(){
+        selectedInfo = selectedInfo === idx ? -1 : idx;
+        infoItems.querySelectorAll('button').forEach(function(b,j){b.setAttribute('aria-pressed',j === selectedInfo);});
+        infoDetail.textContent = selectedInfo < 0 ? '選擇項目查看資料' : item[0] + (category === 'rooms' ? ' · 房間位置' : ' · ' + item[1]);
+      });
+      infoItems.appendChild(btn);
+    });
+    infoDetail.textContent = category === 'measure' ? '尺寸單位：mm。選擇位置查看主要尺寸；完整尺寸可到平面圖查看。' : '選擇項目查看資料';
+  }
+  document.querySelectorAll('.info-tab').forEach(function(btn){
+    btn.addEventListener('click',function(){showInfo(btn.getAttribute('data-info'));});
+  });
+  showInfo('rooms');
   var tmp = new THREE.Vector3();
   function placeAll(list, w, h){
     var narrow = w < 600;
@@ -1649,19 +1716,21 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   });
   // Showing dimensions hides the name tags and switches to the top view, so the numbers don't
   // pile on top of each other; turning them off brings the name tags back.
-  var namesBeforeDims = true;
+  var namesBeforeDims = false;
   var tLab = document.getElementById('tLab');
   document.getElementById('tDim').addEventListener('click', function(){
     var on = dimsEl.hidden;
     dimsEl.hidden = !on;
-    dimGroup.visible = on;
+    dimGroup.visible = false; // Measurements are listed in the panel, not overlaid on the model.
     this.setAttribute('aria-pressed', on);
     if (on){
       namesBeforeDims = !labelsEl.hidden;
       labelsEl.hidden = true;
       tLab.setAttribute('aria-pressed', false);
+      showInfo('measure');
       setView('top');
     } else {
+      showInfo('rooms');
       labelsEl.hidden = !namesBeforeDims;
       tLab.setAttribute('aria-pressed', namesBeforeDims);
     }
