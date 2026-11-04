@@ -88,9 +88,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <li><span class="sw" style="background:var(--c-piano)"></span>鋼琴</li>
     <li><span class="sw" style="background:var(--c-sofa)"></span>L型梳化</li>
     <li><span class="sw" style="background:var(--c-entry)"></span>玄關櫃</li>
-    <li><span class="sw" style="background:var(--c-bed)"></span>碌架床</li>
+    <li><span class="sw" style="background:var(--c-bed)"></span>碌架床（睡房 1）</li>
+    <li><span class="sw" style="background:var(--c-table)"></span>組合床（睡房 2）</li>
+    <li><span class="sw" style="background:var(--c-cab)"></span>雙人床、衣櫃（睡房 3）</li>
   </ul>
-  <p class="note">房間淨尺寸、門闊同樓底按實度。傢俬按實物尺寸：梳化 1900 × 1500、深 850、座高 420；電視櫃 1600 × 400、高 450；鋼琴 1600 × 650、高 1250；玄關櫃 1600 × 400、高 1000；睡房 1 碌架床 SERENO HA-361CD-3R 1830 × 1880、高 1887（上床下衣櫃，下床拉出，右邊梯）。梳化短邊、電視櫃同玄關櫃深度係估計。</p>
+  <p class="note">房間淨尺寸、門闊同樓底按實度。傢俬按實物尺寸：梳化 1900 × 1500、深 850、座高 420；電視櫃 1600 × 400、高 450；鋼琴 1600 × 650、高 1250；玄關櫃 1600 × 400、高 1000；睡房 1 碌架床 SERENO HA-361CD-3R 1830 × 1880、高 1887；睡房 2 STAPLE 組合床 950 × 1888、高 2200；睡房 3 IKEA MALM 雙人床 1800 × 2000（外框會大少少），SPACE CUBE 趟門衣櫃 1200 × 600、高 2200。梳化短邊、電視櫃同玄關櫃深度係估計。</p>
 </div>
 
 <script>
@@ -1424,25 +1426,51 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   plan(4035, 4885, 1985, 2135, 0, 0.6, sofa, 0x7B63D1);  // arm, south end
   plan(5385, 5535, 235, 1085, 0, 0.6, sofa, 0x7B63D1);   // arm, east end
 
-  // Bedroom 1: SERENO HA-361CD-3R loft bed, 1830 W x 1880 D x 1887 H, against the bedroom 1/2 wall.
-  // Upper bed runs along the wall, three-door wardrobe under its south half, lower bed pulls out
-  // perpendicular at the north end, ladder on the right (south) end when facing the bed.
+  // Bedroom 1: SERENO HA-361CD-3R loft bed, 1830 x 1880, 1887 high, in the south-east corner.
+  // Upper bed (1830) runs along the bedroom 1/2 wall; lower bed (1880) runs along the south wall;
+  // three-door wardrobe under the north half of the upper bed; ladder at the north end.
   var bedWood = 0xE6E1DA, bedTag = 0x2A9D8F, white2 = mat(0xFAFAF8), rail = mat(0xB8BEC4, {metalness: 0.4, roughness: 0.4});
+  var seam = mat(0x9A948C);
   plan(1685, 2685, 6469, 6499, 0, 1.887, bedWood, bedTag);        // north end panel
   plan(1685, 2685, 8269, 8299, 0, 1.887, bedWood, bedTag);        // south end panel
   plan(1685, 2685, 6499, 8269, 1.3, 1.4, bedWood, bedTag);        // upper deck
   addBox(st, 1735, 2635, 6519, 8249, 1.4, 1.55, white2);          // upper mattress
   plan(2655, 2685, 6499, 8269, 1.4, 1.887, bedWood, bedTag);      // back guard rail
-  plan(1685, 1715, 6499, 7849, 1.4, 1.75, bedWood, bedTag);       // front guard rail
-  plan(2135, 2685, 7419, 8269, 0, 1.3, bedWood, bedTag);          // three-door wardrobe
-  [7702, 7986].forEach(function(y){ addBox(st, 2128, 2135, y - 4, y + 4, 0.05, 1.25, mat(0x9A948C), false); });
-  plan(805, 2685, 6499, 7419, 0, 0.33, bedWood, bedTag);          // lower bed with two drawers
-  addBox(st, 825, 2665, 6519, 7399, 0.33, 0.48, white2);          // lower mattress
-  addBox(st, 799, 805, 6560, 6940, 0.06, 0.28, mat(0x9A948C), false);
-  addBox(st, 799, 805, 6980, 7360, 0.06, 0.28, mat(0x9A948C), false);
-  addBox(st, 1640, 1665, 7869, 7894, 0, 1.887, rail);              // ladder rails and rungs
-  addBox(st, 1640, 1665, 8204, 8229, 0, 1.887, rail);
-  for (var r = 1; r <= 5; r++) addBox(st, 1640, 1665, 7894, 8204, r * 0.27 - 0.015, r * 0.27 + 0.015, rail, false);
+  plan(1685, 1715, 6919, 8269, 1.4, 1.75, bedWood, bedTag);       // front guard rail (gap at the ladder)
+  plan(2135, 2685, 6499, 7349, 0, 1.3, bedWood, bedTag);          // three-door wardrobe
+  [6782, 7066].forEach(function(y){ addBox(st, 2128, 2135, y - 4, y + 4, 0.05, 1.25, seam, false); });
+  plan(805, 2685, 7349, 8269, 0, 0.33, bedWood, bedTag);          // lower bed with two drawers
+  addBox(st, 825, 2665, 7369, 8249, 0.33, 0.48, white2);          // lower mattress
+  addBox(st, 805, 1745, 7343, 7349, 0.06, 0.28, seam, false);     // drawer fronts
+  addBox(st, 805, 1745, 7343, 7349, 0.165, 0.175, mat(0x7A746C), false);
+  addBox(st, 1640, 1665, 6539, 6564, 0, 1.887, rail);              // ladder rails and rungs
+  addBox(st, 1640, 1665, 6874, 6899, 0, 1.887, rail);
+  for (var r = 1; r <= 5; r++) addBox(st, 1640, 1665, 6564, 6874, r * 0.27 - 0.015, r * 0.27 + 0.015, rail, false);
+
+  // Bedroom 2: STAPLE bed with five-door overhead wardrobe and hydraulic storage, 950 x 1888, 2200 high,
+  // long side against the bedroom 1/2 wall, foot at the south wall.
+  var staple = 0xB9B3A9, stapleTag = 0x3B76D9;
+  plan(2805, 3755, 6411, 6441, 0, 0.75, staple, stapleTag);       // low end panels
+  plan(2805, 3755, 8269, 8299, 0, 0.75, staple, stapleTag);
+  plan(2805, 3205, 6411, 6441, 0.75, 2.2, staple, stapleTag);     // tall end panels at the back
+  plan(2805, 3205, 8269, 8299, 0.75, 2.2, staple, stapleTag);
+  plan(2805, 3755, 6441, 8269, 0, 0.38, staple, stapleTag);       // storage base
+  addBox(st, 2825, 3735, 6461, 8249, 0.38, 0.55, white2);         // mattress
+  plan(2805, 2835, 6441, 8269, 0.55, 1.25, staple, stapleTag);    // back panel above the mattress
+  plan(2805, 3105, 6441, 8269, 1.25, 1.27, staple, stapleTag);    // open cubby shelf
+  plan(2805, 3205, 6441, 8269, 1.5, 2.2, staple, stapleTag);      // five-door overhead wardrobe
+  for (var dIdx = 1; dIdx < 5; dIdx++){ var yy = 6441 + dIdx * 365.6; addBox(st, 3205, 3211, yy - 3, yy + 3, 1.52, 2.18, seam, false); }
+
+  // Bedroom 3: IKEA MALM storage bed 1800 x 2000, long side along the south wall, headboard on the west wall.
+  var malm = 0xF2F2EF, malmTag = 0xE3BE1F;
+  plan(5000, 7000, 6499, 8299, 0, 0.38, malm, malmTag);           // bed base
+  addBox(st, 5070, 6970, 6529, 8269, 0.38, 0.56, white2);         // mattress
+  plan(5000, 5070, 6499, 8299, 0.38, 1.0, malm, malmTag);         // headboard
+  // Bedroom 3: SPACE CUBE sliding-door wardrobe 1200 x 600, 2200 high, east end of the front wall.
+  plan(6185, 7385, 5299, 5899, 0, 2.2, 0xF4F4F2, 0xE3BE1F);
+  addBox(st, 6195, 7375, 5899, 5905, 0.12, 2.17, mat(0xC9A16E), false);   // oak sliding doors
+  addBox(st, 6782, 6788, 5905, 5909, 0.12, 2.17, seam, false);
+  addBox(st, 6195, 7375, 5905, 5908, 1.38, 1.40, mat(0xEDEAE4), false);
 
   /* ---------- labels ---------- */
   var labelsEl = document.getElementById('labels');
@@ -1469,7 +1497,10 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   label('鋼琴 1600×650', 6585, 2650, 1.5, 'furn', 'var(--c-piano)');
   label('L型梳化 1900', 4560, 1200, 1.0, 'furn', 'var(--c-sofa)');
   label('玄關櫃 1600', 6585, 3085, 1.2, 'furn', 'var(--c-entry)');
-  label('碌架床 1830×1880', 1900, 7000, 2.0, 'furn', 'var(--c-bed)');
+  label('碌架床 1830×1880', 1900, 7300, 2.0, 'furn', 'var(--c-bed)');
+  label('組合床 950×1888', 3280, 7350, 2.4, 'furn', 'var(--c-table)');
+  label('雙人床 1800×2000', 6000, 7400, 1.1, 'furn', 'var(--c-cab)');
+  label('衣櫃 1200×600', 6785, 5600, 2.4, 'furn', 'var(--c-cab)');
 
   /* ---------- measured dimensions (from the site sketch), shown with the 尺寸 button ---------- */
   var dimsEl = document.getElementById('dims');
