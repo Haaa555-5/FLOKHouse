@@ -1502,7 +1502,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     if (color){ var d = document.createElement('span'); d.className = 'dot'; d.style.background = color; el.appendChild(d); }
     el.appendChild(document.createTextNode(text));
     labelsEl.appendChild(el);
-    labels.push({el: el, v: new THREE.Vector3(X(x), h, Z(y))});
+    labels.push({el: el, v: new THREE.Vector3(X(x), h, Z(y)), kind: kind});
   }
   label('客飯廳', 5000, 3700, 0.1, 'room');
   label('廚房', 2600, 1400, 1.1, 'room');
@@ -1671,6 +1671,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     if (!dimsEl.hidden) placeAll(dimLabels, w, h);
     if (labelsEl.hidden) return;
     labels.forEach(function(l){
+      if (l.kind !== 'room'){ l.el.hidden = true; return; }
       tmp.copy(l.v).project(camera);
       var off = tmp.z > 1 || tmp.z < -1;
       l.el.hidden = off;
@@ -1704,6 +1705,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   }
 
   var low = false, tagged = false;
+  // Keep overlay modes mutually exclusive and use the panel for dimensions.
   document.getElementById('v3d').addEventListener('click', function(){ setView('3d'); });
   document.getElementById('vtop').addEventListener('click', function(){ setView('top'); });
   document.getElementById('tLow').addEventListener('click', function(){
@@ -1715,27 +1717,22 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     var on = labelsEl.hidden;
     labelsEl.hidden = !on;
     this.setAttribute('aria-pressed', on);
-  });
-  // Showing dimensions hides the name tags and switches to the top view, so the numbers don't
-  // pile on top of each other; turning them off brings the name tags back.
-  var namesBeforeDims = false;
-  var tLab = document.getElementById('tLab');
-  document.getElementById('tDim').addEventListener('click', function(){
-    var on = dimsEl.hidden;
-    dimsEl.hidden = !on;
-    dimGroup.visible = false; // Measurements are listed in the panel, not overlaid on the model.
-    this.setAttribute('aria-pressed', on);
     if (on){
-      namesBeforeDims = !labelsEl.hidden;
-      labelsEl.hidden = true;
-      tLab.setAttribute('aria-pressed', false);
-      showInfo('measure');
-      setView('top');
-    } else {
+      dimsEl.hidden = true;
+      dimGroup.visible = false;
+      document.getElementById('tDim').setAttribute('aria-pressed', false);
       showInfo('rooms');
-      labelsEl.hidden = !namesBeforeDims;
-      tLab.setAttribute('aria-pressed', namesBeforeDims);
     }
+  });
+  // Dimensions live in the information panel; never cover the 3D model.
+  document.getElementById('tDim').addEventListener('click', function(){
+    var on = this.getAttribute('aria-pressed') !== 'true';
+    this.setAttribute('aria-pressed', on);
+    dimsEl.hidden = true;
+    dimGroup.visible = false;
+    labelsEl.hidden = true;
+    document.getElementById('tLab').setAttribute('aria-pressed', false);
+    showInfo(on ? 'measure' : 'rooms');
   });
   document.getElementById('tTag').addEventListener('click', function(){
     tagged = !tagged;
